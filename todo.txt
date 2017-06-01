@@ -1,0 +1,17 @@
+user login:
+send username + hashed password to api
+retun hased session
+
+user verification: 
+send session hash + action information to api
+return user id 
+
+
+sessions DB: 
+sessionid  userid  ip  sessionhash expiredate deviceip
+
+
+password encription
+password + random string sha512
+random string gets saved with user information
+
