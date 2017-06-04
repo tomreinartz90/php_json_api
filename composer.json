@@ -2,5 +2,9 @@
     "require": {
         "slim/slim": "^3.0",
         "catfan/Medoo": "^1.4"
+    },
+    "config": {
+        "disable-tls": true,
+        "secure-http": false
     }
 }
