@@ -71,6 +71,12 @@ class FilterHelper
     $this->query = $filter;
   }
 
+
+  /**
+   * get the filterType from the condition string
+   * @param $filterString
+   * @return bool|string
+   */
   private function getFilterType($filterString){
     if(strpos($filterString, '::')) {
       return "STRICT_EQUALS";
