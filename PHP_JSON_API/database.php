@@ -5,6 +5,7 @@
  * Date: 30-5-2017
  * Time: 13:58
  */
+require_once "FilterHelper.php";
 
 use Medoo\Medoo;
 
@@ -20,9 +21,11 @@ class DatabaseHelpers
   }
 
   //get a pagable object from the db
-  function getRecordsInTable($table, $columns, $page, $size){
+  function getRecordsInTable($table, $columns, $page, $size, $query){
     $page = intval($page);
     $size = intval($size);
+
+    $filter = new FilterHelper($query);
 
     //count the number of records in the db.
     $count = $this->database->count($table, []);
@@ -42,6 +45,7 @@ class DatabaseHelpers
       'size' => $size,
       'totalPages' => $totalPages,
       'totalElements' => $count,
+      'filter' => $filter->query
     ];
 
 

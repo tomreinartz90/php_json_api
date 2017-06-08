@@ -79,6 +79,7 @@ class PhpJsonApi
       //handle get request
       if($request->isGet()){
         $params = $request->getQueryParams();
+        $query = $request->getUri()->getQuery();
         if($showDetails){
           $returnData = $database->getRecordInTable($config['table'], $config['columns'], $config['idField'], $idValue);
           //db returns list of data, only 1 record is needed.
@@ -90,7 +91,7 @@ class PhpJsonApi
         } else {
           $page = isset($params['page']) ? $params['page'] : 0;
           $size = isset($params['size']) ? $params['size'] : (isset( $this->config['default_page_size'] ) ? $this->config['default_page_size'] : 20);
-          $returnData = $database->getRecordsInTable($config['table'], $config['columns'],  $page, $size);
+          $returnData = $database->getRecordsInTable($config['table'], $config['columns'],  $page, $size, $query);
         }
       }
 
