@@ -10,7 +10,7 @@ class FilterHelper
 {
 
   private $rawQuery;
-  public $query;
+  private $filter;
 
   private $FilterTypes = [
     "LESS_THEN" => "<",
@@ -31,7 +31,7 @@ class FilterHelper
   }
 
   public function getFilter(){
-
+    return $this->filter;
   }
 
   /**
@@ -68,7 +68,7 @@ class FilterHelper
       array_push($filter, $andFilter);
     }
 
-    $this->query = $filter;
+    $this->filter = $filter;
   }
 
 

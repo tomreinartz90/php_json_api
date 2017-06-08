@@ -45,7 +45,7 @@ class DatabaseHelpers
       'size' => $size,
       'totalPages' => $totalPages,
       'totalElements' => $count,
-      'filter' => $filter->query
+      'filter' => $filter->filter
     ];
 
 
