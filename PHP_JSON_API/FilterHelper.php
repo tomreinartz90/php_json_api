@@ -10,7 +10,11 @@ class FilterHelper
 {
 
   private $rawQuery;
-  private $filter;
+
+  /**
+   * Array of AND conditions nested with an Array of or conditions
+   */
+  private $filter = [[]];
 
   private $FilterTypes = [
     "LESS_THEN" => "<",
@@ -21,6 +25,16 @@ class FilterHelper
     "STRICT_EQUALS" => "::",
     "NOT_EQUALS" => "!"
   ];
+
+  private $MedooFilterTypes = [
+    "LESS_THEN" => "[<]",
+    "LESS_THEN_EQUALS" => "[<=]",
+    "GREATER_THEN" => "[>]",
+    "GREATER_THEN_EQUALS" => "[>=]",
+    "EQUALS" => "[~]",
+    "STRICT_EQUALS" => "",
+    "NOT_EQUALS" => "[!]"
+  ];
   /**
    * FilterHelper constructor.
    */
@@ -30,14 +44,38 @@ class FilterHelper
     $this->parseQuery();
   }
 
+  /**
+   * @return array
+   */
   public function getFilter(){
     return $this->filter;
   }
 
+  public function getMeedoFilter(){
+    $meedooFilterContent = [];
+    foreach ($this->getFilter() as $andCondition){
+      $orFilter = [];
+      foreach ($andCondition as $filter){
+
+      };
+      array_push($meedooFilterContent, ["AND" => $orFilter]
+    }
+
+//    [
+//      "AND" => [
+//        "OR" => [
+//          "user_name" => "foo",
+//          "email" => "foo@bar.com"
+//        ],
+//        "password" => "12345"
+//      ]
+//    ];
+
+    return ["AND" => $meedooFilterContent];
+  }
+
   /**
    * method to parse the queryparams to an array of filter objects.
-   *
-   *
    */
   private function parseQuery()
   {
