@@ -6,6 +6,8 @@
  * Date: 8-6-2017
  * Time: 22:55
  */
+namespace JsonApi;
+
 class FilterHelper
 {
 
@@ -71,7 +73,7 @@ class FilterHelper
         return [];
     }
 
-    private function getRealMedooColumn($columnName, $columnConfig){
+    public static function getRealMedooColumn($columnName, $columnConfig){
         $column = null;
         if($columnConfig){
             foreach ($columnConfig as $columnInfo){

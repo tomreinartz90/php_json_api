@@ -5,6 +5,6 @@ require 'vendor/autoload.php';
 use \JsonApi\Core;
 require_once 'auth_config.php';
 
-$app = new \JsonApi\AuthService($config);
+$app = new \JsonApi\Core($config);
 
 $app->run();

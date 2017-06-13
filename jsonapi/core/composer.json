@@ -1,0 +1,14 @@
+{
+    "name": "jsonapi/core",
+    "version": "0.0.0",
+    "type": "library",
+    "require": {
+        "slim/slim": "^3.0",
+        "catfan/Medoo": "^1.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "JsonApi\\": "core"
+        }
+    }
+}
