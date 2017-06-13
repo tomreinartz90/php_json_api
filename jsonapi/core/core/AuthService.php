@@ -73,7 +73,6 @@ class AuthService extends \JsonApi\Core
         'idField' => 'userId',
         'columns' => [
           'username',
-          'password',
         ],
         'requestHandler' => function($config, $request, $response, $args){return $this->handleUsersRequest($config, $request, $response, $args);}
       ],
@@ -121,7 +120,7 @@ class AuthService extends \JsonApi\Core
       $user['secret'] = $secret;
       $user['password'] = $password;
       var_dump($user);
-      echo("blah");
+
       $request->write(json_encode($user));
     }
     return $this->requestHandler($config, $request, $response, $args);

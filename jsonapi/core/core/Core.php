@@ -47,38 +47,40 @@ class Core
       //setup route groups
       $app = $this;
       $auth = new \JsonApi\AuthClient($route, isset($config['auth_url']) ? $config['auth_url'] : null);
+      $dynamicMiddleWare = function($request, $response, $next){
+        if(isset($route['middleWare'])){
+          return $route['middleWare']($request, $response, $next);
+        } else {
+          return $response = $next($request, $response);
+        }
+      };
+
+      $customeRequestHandler = function($app, $route, $request, $response, $args){
+        if(isset($route['requestHandler'])){
+          return $route['requestHandler']($route, $request, $response, $args);
+        } else {
+          return $app->requestHandler($route, $request, $response, $args);
+        }
+      };
+
+
       if (isset($route['routeGroup'])) {
 //        var_dump( $route );
-        $this->slim->group($route['routeGroup'], function () use ($route, $app)  {
-          $this->map(['GET', 'POST'], '', function ($request, $response, $args) use ($route, $app) {
-            //todo add auth check here
-            if(isset($config['requestHandler'])){
-              return $config['requestHandler']($request, $response, $args);
-            } else {
-              return $app->requestHandler($route, $request, $response, $args);
-            }          })->setName($route['routeGroup']);
-          $this->map(['GET', 'DELETE', 'PATCH', 'PUT'], '/{id:[0-9]+}', function ($request, $response, $args) use ($route, $app) {
-            if(isset($config['requestHandler'])){
-              return $config['requestHandler']($request, $response, $args);
-            } else {
-              return $app->requestHandler($route, $request, $response, $args);
-            }
+        $this->slim->group($route['routeGroup'], function () use ($route, $app, $customeRequestHandler)  {
+          $this->map(['GET', 'POST'], '', function ($request, $response, $args) use ($route, $app, $customeRequestHandler) {
+            return $customeRequestHandler($app, $route, $request, $response, $args);
+          })->setName($route['routeGroup']);
+          $this->map(['GET', 'DELETE', 'PATCH', 'PUT'], '/{id:[0-9]+}', function ($request, $response, $args) use ($route, $app, $customeRequestHandler) {
+            return $customeRequestHandler($app, $route, $request, $response, $args);
           })->setName($route['routeGroup'] . '-details');
-        })->add($auth);
+        })->add($dynamicMiddleWare)->add($auth);;
       }
 
       //setup individual routes
       if (isset($route['route'])) {
         $this->slim->map(['GET', 'DELETE', 'PATCH', 'PUT'], $route['route'], function ($request, $response, $args) use ($route, $app) {
           return $app->requestHandler($route, $request, $response, $args);
-        })->add(function($request, $response, $next){
-          if(isset($route['middleWare'])){
-            return $route['middleWare']($request, $response, $next);
-          } else {
-            return $response = $next($request, $response);
-
-          }
-        })->add($auth);
+        })->add($dynamicMiddleWare)->add($auth);
       }
     }
   }
