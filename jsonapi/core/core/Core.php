@@ -59,7 +59,7 @@ class Core
         if(isset($route['requestHandler'])){
           return $route['requestHandler']($route, $request, $response, $args);
         } else {
-          return $app->requestHandler($route, $request, $response, $args);
+          return $app->dataBaseMiddleWare($route, $request, $response, $args);
         }
       };
 
@@ -78,8 +78,8 @@ class Core
 
       //setup individual routes
       if (isset($route['route'])) {
-        $this->slim->map(['GET', 'DELETE', 'PATCH', 'PUT'], $route['route'], function ($request, $response, $args) use ($route, $app) {
-          return $app->requestHandler($route, $request, $response, $args);
+        $this->slim->map(['GET', 'DELETE', 'PATCH', 'PUT'], $route['route'], function ($request, $response, $args) use ($route, $app, $customeRequestHandler) {
+          return $customeRequestHandler($app, $route, $request, $response, $args);
         })->add($dynamicMiddleWare)->add($auth);
       }
     }
@@ -87,12 +87,14 @@ class Core
 
 
 
-  protected function requestHandler($config, $request, $response, $args){
+  protected function dataBaseMiddleWare($config, $request, $response, $next){
+    $args = $request->getAttribute('routeInfo')[2];
     $showDetails = isset($args['id']);
     $idValue = $showDetails ? $args['id'] : null;
     $database = new \JsonApi\DatabaseHelpers($this->config['database_config']);
     $returnData = null;
     $notFound = false;
+
     //handle get request
     if($request->isGet()){
       $params = $request->getQueryParams();
@@ -131,14 +133,16 @@ class Core
     $response =  $response->withHeader('Content-Type', 'application/json');
     if( !$database->error() ){
       //check if there was data found
-      return $response->withStatus($notFound ? 404 : 200)->write(json_encode($returnData));
+      $response = $response->withStatus($notFound ? 404 : 200)->write(json_encode($returnData));
     } else {
       $errorObj = [
         'message' => $database->error()[2]
       ];
-      return $response->withStatus(500)->write(json_encode($errorObj));
-
+      $response = $response->withStatus(500)->write(json_encode($errorObj));
     }
 
+    //goto the next middle ware
+    $response = $next($request, $response);
+    return $response;
   }
 }

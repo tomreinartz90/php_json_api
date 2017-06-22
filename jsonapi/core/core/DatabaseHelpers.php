@@ -16,11 +16,11 @@ class DatabaseHelpers
 {
 
 
-  private $database;
+  public $handler;
 
   function __construct($dbConfig)
   {
-    $this->database = new Medoo($dbConfig);
+    $this->handler = new Medoo($dbConfig);
   }
 
   //get a pagable object from the db
@@ -32,7 +32,7 @@ class DatabaseHelpers
 
     $medooFilter = $filter->getMeedoFilter($columns);
     //count the number of records in the db.
-    $count = $this->database->count($table, $medooFilter);
+    $count = $this->handler->count($table, $medooFilter);
     $totalPages = floor($count / $size);
     $content = null;
     //get data from the db if there is data to get from the db
@@ -40,7 +40,7 @@ class DatabaseHelpers
       $pageingArray = ["LIMIT" => [($size * $page), $size ]];
       $fullFilter = array_merge($pageingArray, $medooFilter);
 
-      $content = $this->database->select($table, $columns, $fullFilter);
+      $content = $this->handler->select($table, $columns, $fullFilter);
     }
 
     //create a pageable object
@@ -61,13 +61,18 @@ class DatabaseHelpers
 
   //get details about a record from the db
   function getRecordInTable($table, $columns, $idField, $idFieldValue){
-    return $this->database->select($table, $columns, [$idField => $idFieldValue, "LIMIT" => [0, 1]]);
+    $result = $this->handler->select($table, $columns, [$idField => $idFieldValue, "LIMIT" => [0, 1]]);
+    if(isset($result[0]) && !is_null($result[0])){
+      return $result[0];
+    } else {
+      return null;
+    }
   }
 
   //update a record in the db
   function updateRecordInTable($table, $columns, $data, $idField, $idFieldValue){
     $parsedData = $this->parseColumnsInCreateObject($data, $columns, $idField);
-    $update = $this->database->update($table, $parsedData, [$idField => $idFieldValue]);
+    $update = $this->handler->update($table, $parsedData, [$idField => $idFieldValue]);
 
 
     return  $this->handleInsertOrUpdate($update, $table, $columns, $idField);
@@ -76,7 +81,7 @@ class DatabaseHelpers
 
   //delete a record in the db
   function deleteRecordInTable($table, $idField, $idFieldValue){
-    $this->database->delete($table, [$idField => $idFieldValue]);
+    $this->handler->delete($table, [$idField => $idFieldValue]);
     return null;
   }
 
@@ -85,13 +90,13 @@ class DatabaseHelpers
     $parsedData = $this->parseColumnsInCreateObject($data, $columns, $idField);
 
     //insert data in the db.
-    $insert = $this->database->insert($table, $parsedData);
+    $insert = $this->handler->insert($table, $parsedData);
     return $this->handleInsertOrUpdate($insert, $table, $columns, $idField);
 
   }
 
   function error(){
-    $error = $this->database->error();
+    $error = $this->handler->error();
     if($error and $error[2] != null){
       return $error;
     } else {
@@ -118,7 +123,7 @@ class DatabaseHelpers
       return $this->error();
     } else {
       //get the record that has been created.
-      return $this->getRecordInTable($table, $columns, $idField, $this->database->id())[0];
+      return $this->getRecordInTable($table, $columns, $idField, $this->handler->id())[0];
     }
   }
 }
