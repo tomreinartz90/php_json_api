@@ -1,10 +1,12 @@
 <?php
-require 'vendor/autoload.php';
+  require 'vendor/autoload.php';
 
 //include 'auth/index.php';
-use \JsonApi\Core;
-require_once 'auth_config.php';
+  use \JsonApi\Core;
+  require_once 'config.php';
 
-$app = new \JsonApi\AuthService($config);
+  $app = new \JsonApi\Core($config);
+  $app->slim->add(new \JsonApi\GoogleOAuth2());
+  $app->run();
 
-$app->run();
+  ?>
