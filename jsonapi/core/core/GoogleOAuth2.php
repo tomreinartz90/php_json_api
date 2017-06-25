@@ -94,7 +94,6 @@
 
 
       if ( $client -> getAccessToken() ) {
-//        $response -> write( json_encode( $service -> userinfo -> get() ) );
         $request = $request -> withAttribute( 'user_info', $service -> userinfo -> get() );
         return $next( $request, $response );
       }
