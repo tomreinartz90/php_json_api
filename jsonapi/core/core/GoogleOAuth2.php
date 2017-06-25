@@ -5,10 +5,13 @@
   use Google_Client;
   use Google_Service_Oauth2;
   use GuzzleHttp\Client;
+  use Firebase\JWT\JWT;
 
   class GoogleOAuth2
   {
 
+
+    private $JWT_KEY = "MosXCKe:T_r6tu-jkZyX0,swz)[AgQJi0TpD-|n`NE]Zb]XgvAnL?b+0uC)~[U";
 
     function __construct()
     {
@@ -39,7 +42,7 @@
       /**
        * get the currently active auth token from the header,
        */
-      $authSession = $request -> getHeader( 'authorization' );
+      $authSession = $this -> decodeJwt( $request -> getHeader( 'Authorization' ) );
 
       /*************************************************
        * Ensure you've downloaded your oauth credentials
@@ -79,20 +82,20 @@
         $client -> setAccessToken( $token );
 
         // redirect back to the example
-        return $response -> withStatus( 401 ) -> withJson( [ "authorization-header" =>  $token ] );
+        return $response -> withStatus( 401 ) -> withJson( [ "authorization-header" => $this -> encodeJwt( $token ) ] );
       }
 
 
       // set the access token as part of the client
-      if ( $response -> hasHeader( 'authorization' ) ) {
+      if ( $request -> hasHeader( 'Authorization' ) ) {
         $client -> setAccessToken( $authSession );
         if ( $client -> isAccessTokenExpired() ) {
           return $response -> withStatus( 401 ) -> withJson( [ "error" => "session expired" ] );
         }
       } else {
         $authUrl = $client -> createAuthUrl();
-        return $response -> withStatus( 401 ) -> withHeader( 'Location', filter_var( $authUrl, FILTER_SANITIZE_URL ) );
-//        return $response -> withStatus( 401 ) -> withJson( ["authUrl" =>  $authUrl] );
+//        return $response -> withStatus( 401 ) -> withHeader( 'Location', filter_var( $authUrl, FILTER_SANITIZE_URL ) );
+        return $response -> withStatus( 401 ) -> withJson( [ "authUrl" => $authUrl ] );
       }
 
 
@@ -138,21 +141,18 @@
 
     }
 
-    private function cache_set( $key, $val )
+
+    private function encodeJwt( $token )
     {
-      $val = var_export( $val, true );
-      // HHVM fails at __set_state, so just use object cast for now
-//      $val = str_replace('stdClass::__set_state', '(object)', $val);
-      // Write to temp file first to ensure atomicity
-      $tmp = "./tmp/$key." . uniqid( '', true ) . '.tmp';
-      file_put_contents( $tmp, '<?php $val = ' . $val . ';', LOCK_EX );
-      rename( $tmp, "./tmp/$key" );
+      return JWT ::encode( $token, $this -> JWT_KEY );
     }
 
-    function cache_get( $key )
+    private function decodeJwt( $header )
     {
-      @include "/tmp/$key";
-      return isset( $val ) ? $val : false;
+      if ( !is_null( $header ) && count( $header ) == 1 ) {
+        return (array)JWT ::decode( $header[ 0 ], $this -> JWT_KEY, [ 'HS256' ] );
+      }
+      return null;
     }
 
   }
