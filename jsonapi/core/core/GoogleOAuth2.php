@@ -27,10 +27,6 @@
      */
     public function __invoke( $request, $response, $next )
     {
-
-//      $this->cache_set("boo", "bah");
-//      return $response->write($this->cache_get("bah"));
-
       return $this -> handleAuth( $request, $response, $next );
     }
 
@@ -55,7 +51,6 @@
 
       /************************************************
        * The redirect URI is to the current page, e.g:
-       * http://localhost:8080/simple-file-upload.php
        ************************************************/
       $redirect_uri = 'http://' . $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'PHP_SELF' ];
       $client = new Google_Client();
@@ -94,13 +89,12 @@
         }
       } else {
         $authUrl = $client -> createAuthUrl();
-//        return $response -> withStatus( 401 ) -> withHeader( 'Location', filter_var( $authUrl, FILTER_SANITIZE_URL ) );
         return $response -> withStatus( 401 ) -> withJson( [ "authUrl" => $authUrl ] );
       }
 
 
       if ( $client -> getAccessToken() ) {
-        $response -> write( json_encode( $service -> userinfo -> get() ) );
+//        $response -> write( json_encode( $service -> userinfo -> get() ) );
         $request = $request -> withAttribute( 'user_info', $service -> userinfo -> get() );
         return $next( $request, $response );
       }
