@@ -137,15 +137,28 @@
 
     private function encodeJwt( $token )
     {
-      return JWT ::encode( $token, $this -> JWT_KEY );
+      return $this->getJwtService()::encode( $token, $this -> JWT_KEY );
     }
 
     private function decodeJwt( $header )
     {
       if ( !is_null( $header ) && count( $header ) == 1 ) {
-        return (array)JWT ::decode( $header[ 0 ], $this -> JWT_KEY, [ 'HS256' ] );
+        return (array)$this->getJwtService()::decode( $header[ 0 ], $this -> JWT_KEY, [ 'HS256' ] );
       }
       return null;
+    }
+
+    private function getJwtService()
+    {
+      $jwtClass = new JWT();
+
+      if (property_exists($jwtClass, 'leeway')) {
+        // adds 1 second to JWT leeway
+        // @see https://github.com/google/google-api-php-client/issues/827
+        $jwtClass::$leeway = 1;
+      }
+
+      return new $jwtClass;
     }
 
   }
