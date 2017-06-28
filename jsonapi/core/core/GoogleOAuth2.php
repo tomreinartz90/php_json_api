@@ -2,10 +2,9 @@
 
   namespace JsonApi;
 
+  use Firebase\JWT\JWT;
   use Google_Client;
   use Google_Service_Oauth2;
-  use GuzzleHttp\Client;
-  use Firebase\JWT\JWT;
 
   class GoogleOAuth2
   {
@@ -74,6 +73,8 @@
        ************************************************/
       if ( isset( $_GET[ 'code' ] ) ) {
         $token = $client -> fetchAccessTokenWithAuthCode( $_GET[ 'code' ] );
+        $token[ 'user' ] = $service -> userinfo -> get();
+
         $client -> setAccessToken( $token );
 
         // redirect back to the example
@@ -94,8 +95,9 @@
 
 
       if ( $client -> getAccessToken() ) {
-        $request = $request -> withAttribute( 'user_info', $service -> userinfo -> get() );
+        $request = $request -> withAttribute( 'user_info', $authSession[ 'user' ] );
         return $next( $request, $response );
+//        return $response;
       }
 
     }
